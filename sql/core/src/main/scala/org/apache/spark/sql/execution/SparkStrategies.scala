@@ -127,6 +127,18 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
     }
   }
 
+  /**
+   * Matches a plan whose output should be small enough to be used in broadcast join.
+   */
+  object CanBroadcast {
+    def unapply(plan: LogicalPlan): Option[LogicalPlan] = plan match {
+      case BroadcastHint(p) => Some(p)
+      case p if sqlContext.conf.autoBroadcastJoinThreshold > 0 &&
+        p.statistics.sizeInBytes <= sqlContext.conf.autoBroadcastJoinThreshold => Some(p)
+      case _ => None
+    }
+  }
+
   object HashAggregation extends Strategy {
     def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
       // Aggregations that can be performed in two phases, before and after the shuffle.
