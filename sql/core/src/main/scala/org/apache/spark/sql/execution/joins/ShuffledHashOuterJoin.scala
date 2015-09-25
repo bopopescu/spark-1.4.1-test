@@ -43,7 +43,7 @@ case class ShuffledHashOuterJoin(
   override def requiredChildDistribution: Seq[Distribution] =
     ClusteredDistribution(leftKeys) :: ClusteredDistribution(rightKeys) :: Nil
 
-  protected override def doExecute(): RDD[InternalRow] = {
+  protected override def doExecute(): RDD[Row] = {
     val joinedRow = new JoinedRow()
     left.execute().zipPartitions(right.execute()) { (leftIter, rightIter) =>
       // TODO this probably can be replaced by external sort (sort merged join?)

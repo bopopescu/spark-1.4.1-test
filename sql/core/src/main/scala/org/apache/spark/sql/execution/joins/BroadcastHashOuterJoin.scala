@@ -76,14 +76,14 @@ case class BroadcastHashOuterJoin(
   @transient
   private val broadcastFuture = future {
     // Note that we use .execute().collect() because we don't want to convert data to Scala types
-    val input: Array[InternalRow] = buildPlan.execute().map(_.copy()).collect()
+    val input: Array[Row] = buildPlan.execute().map(_.copy()).collect()
     // buildHashTable uses code-generated rows as keys, which are not serializable
     val hashed =
       buildHashTable(input.iterator, new InterpretedProjection(buildKeys, buildPlan.output))
     sparkContext.broadcast(hashed)
   }(BroadcastHashOuterJoin.broadcastHashOuterJoinExecutionContext)
 
-  override def doExecute(): RDD[InternalRow] = {
+  override def doExecute(): RDD[Row] = {
     val broadcastRelation = Await.result(broadcastFuture, timeout)
 
     streamedPlan.execute().mapPartitions { streamedIter =>
