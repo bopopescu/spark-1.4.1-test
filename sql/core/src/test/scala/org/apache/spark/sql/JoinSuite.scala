@@ -147,7 +147,7 @@ class JoinSuite extends QueryTest with BeforeAndAfterEach {
         classOf[BroadcastHashOuterJoin])
     ).foreach { case (query, joinClass) => assertJoin(query, joinClass) }
     try {
-      conf.setConf(SQLConf.SORTMERGE_JOIN, true)
+      conf.setConf(SQLConf.SORTMERGE_JOIN, "true")
       Seq(
         ("SELECT * FROM testData LEFT JOIN testData2 ON key = a", classOf[ShuffledHashOuterJoin]),
         ("SELECT * FROM testData RIGHT JOIN testData2 ON key = a where key = 2",
@@ -156,7 +156,7 @@ class JoinSuite extends QueryTest with BeforeAndAfterEach {
           classOf[BroadcastHashOuterJoin])
       ).foreach { case (query, joinClass) => assertJoin(query, joinClass) }
     } finally {
-      conf.setConf(SQLConf.SORTMERGE_JOIN, SORTMERGEJOIN_ENABLED)
+      conf.setConf(SQLConf.SORTMERGE_JOIN, SORTMERGEJOIN_ENABLED.toString)
     }
 
     sql("UNCACHE TABLE testData")
