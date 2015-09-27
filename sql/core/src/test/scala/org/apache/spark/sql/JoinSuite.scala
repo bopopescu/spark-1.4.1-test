@@ -135,10 +135,10 @@ class JoinSuite extends QueryTest with BeforeAndAfterEach {
   }
 
   test("broadcasted hash outer join operator selection") {
-    ctx.cacheManager.clearCache()
-    ctx.sql("CACHE TABLE testData")
+    cacheManager.clearCache()
+    sql("CACHE TABLE testData")
 
-    val SORTMERGEJOIN_ENABLED: Boolean = ctx.conf.sortMergeJoinEnabled
+    val SORTMERGEJOIN_ENABLED: Boolean = conf.sortMergeJoinEnabled
     Seq(
       ("SELECT * FROM testData LEFT JOIN testData2 ON key = a", classOf[ShuffledHashOuterJoin]),
       ("SELECT * FROM testData RIGHT JOIN testData2 ON key = a where key = 2",
@@ -147,7 +147,7 @@ class JoinSuite extends QueryTest with BeforeAndAfterEach {
         classOf[BroadcastHashOuterJoin])
     ).foreach { case (query, joinClass) => assertJoin(query, joinClass) }
     try {
-      ctx.conf.setConf(SQLConf.SORTMERGE_JOIN, true)
+      conf.setConf(SQLConf.SORTMERGE_JOIN, true)
       Seq(
         ("SELECT * FROM testData LEFT JOIN testData2 ON key = a", classOf[ShuffledHashOuterJoin]),
         ("SELECT * FROM testData RIGHT JOIN testData2 ON key = a where key = 2",
@@ -156,10 +156,10 @@ class JoinSuite extends QueryTest with BeforeAndAfterEach {
           classOf[BroadcastHashOuterJoin])
       ).foreach { case (query, joinClass) => assertJoin(query, joinClass) }
     } finally {
-      ctx.conf.setConf(SQLConf.SORTMERGE_JOIN, SORTMERGEJOIN_ENABLED)
+      conf.setConf(SQLConf.SORTMERGE_JOIN, SORTMERGEJOIN_ENABLED)
     }
 
-    ctx.sql("UNCACHE TABLE testData")
+    sql("UNCACHE TABLE testData")
   }
 
   test("multiple-key equi-join is hash-join") {
